@@ -348,12 +348,16 @@ def cooling_sys(D1: float, D2: float, V: float):
 #     for i in range(0, 720):
 #         I[i] = ((k0 * (e_el ** 2) * (Ua ** 2) * I * Z_vol) / (2 * (r ** 2))) * math.e(-1 * ((mu * x0) / math.cos(fi)))
 
+def I_SS_7167_func():
+    # In = тут типа решение и все такое...
+
+    pass
 
 if __name__ == '__main__':
     #Хараджа страница 144 - таблица констант по охлождению
     #el_para_kat()
     print("Ну давай, посчитай мне эту пупу!")
-    #U_prob = int(input("Введите пробивное напряжение в киловольтах: "))
+    #U_pit = int(input("Введите питающее напряжение в киловольтах: "))
 
     #n = float(input("Введите кинематическую вязкость жидкости: "))
     n = 10.3 * (10 ** -6) #Внимание! это в размерности [м^2 / с]
@@ -382,13 +386,13 @@ if __name__ == '__main__':
     # V = float(input("Введите расход жидкости в л/мин: "))
     V = 6
 
-    U_prob = 100
+    U_pit = 100
 
     #f_L_vint()
-    #BreakDownVol(U_prob)
-    #DistanceElectrodeBallone(10, 147.8, 80, U_prob)
+    BreakDownVol(U_pit)
+    DistanceElectrodeBallone(10, 147.8, 80, U_prob)
     #thermal_mode_of_anode(P, R, H)
-    cooling_sys(D1, D2, V)
+    #cooling_sys(D1, D2, V)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

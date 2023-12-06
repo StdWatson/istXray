@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+from mpl_toolkits import mplot3d
 
 # eps =
 #Tc1 = 1073  # 200 - 300 по Цельсьсию
@@ -139,7 +140,7 @@ def BreakDownVol(U_pit: float, C: float = 47, k: float = 0.6):
     # C = 47 кВ/мм
     # k = 0.6
     print(f"Приняты следующие коффициенты: C {C} кВ/мм и k: {k}")
-    U_pob = C * (d ** k)
+    U_pob = round(C * (d ** k), 3)
     print(f"Пробивное напряжение: {U_pob} кВ")
 
     return U_pob
@@ -182,7 +183,7 @@ def potential_graph(Elec_distance: float, Tube_length: float, Katod_length: floa
     #plt.plot(x2, y2)
     plt.grid(True)
     plt.xlabel("Длина,  мм")
-    plt.ylabel("Напряжение, кВ")
+    plt.ylabel("Напряжение, В")
     plt.legend(['U1', 'U2'])
     plt.show()
 
@@ -320,7 +321,7 @@ def thermal_mode_of_anode(P: float, R: float, H: float):
     print("Расход жидкости: ", V)
     Tc = temp_in_point(Tc1, P, R, H, lb_med)
     Tf = temp_in_the_fok_midl(Tc, P, R, lb_wol)
-    Tm = temp_in_the_sl_midl(Tc, P, R, lb_med)
+    Tm = temp_in_the_sl_midl(Tc, P, R, lb_wol)
     print(f"При этом максимальная температура для вольфрама составляет: {T_f_max} градусов Цельсия")
 
     P_max = f_P_max(R, H, lb_wol)
@@ -390,8 +391,8 @@ if __name__ == '__main__':
 
     #f_L_vint()
     BreakDownVol(U_pit)
-    DistanceElectrodeBallone(10, 147.8, 80, U_prob)
-    #thermal_mode_of_anode(P, R, H)
+    #DistanceElectrodeBallone(10, 147.8, 80, U_pit)
+    thermal_mode_of_anode(P, R, H)
     #cooling_sys(D1, D2, V)
 
 

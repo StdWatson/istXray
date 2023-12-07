@@ -15,7 +15,9 @@ Tj = 40 # Это в градусах Цельсия - средняя темпе�
 # ld_med = 330 # ккал/(м * ч * град) Это для меди
 lb_med = 3.7 # Вт/(см * град) Это для меди
 lb_wol = 1.2 # Вт/(см * град) Это для вольфрама
-lb_masl = 0.094 # ккал/(м * ч * град) Это для масла
+#lb_masl = 0.094 # ккал/(м * ч * град) Это для масла
+lb_masl = 0.192 # ккал/(м * ч * град) Это для масла
+lb_med_cal = 330 # ккал/(м * ч * град) Это для меди
 Pr = 43.9  # для масла при 100 градусах
 nu_masl = 10.3 * (10 ** -6) # м^2/c кинематическая вязкость масла
 k0 = 2.2 * (10 ** -9) # Размерная константа в формуле Крамерса
@@ -145,6 +147,7 @@ def BreakDownVol(U_pit: float, C: float = 47, k: float = 0.6):
 
     return U_pob
 
+
 def potential_graph(Elec_distance: float, Tube_length: float, Katod_length: float, U_prob: float):
     k1 = U_prob / Tube_length
     b1 = 0
@@ -220,7 +223,7 @@ def f_liquid_speed(n: float, d_ekv: float):
 
 def Reynolds_numb(d: float, w:float, n: float):
     print("Расчет числа Рейнольдса")
-    Re  = (w * d) / n
+    Re  = round((w * d) / n, 2)
     print("Число Рейнольдса: ", Re)
 
     return Re
@@ -241,8 +244,8 @@ def heat_transfer_coefficient(lb: float, d1: float, d2: float, Re1: float, Re2: 
     #Re = 2200
     #Pr = Prandtl_numb(n, a)
 
-    a1 = 1.68 * (Re1 ** 0.46) * (Pr ** 0.4) * (lb / d1)
-    a2 = 0.22 * (Re2 ** 0.6) * (Pr ** 0.4) * (lb / d2)
+    a1 = round(1.68 * (Re1 ** 0.46) * (Pr ** 0.4) * (lb / d1), 2)
+    a2 = round(0.22 * (Re2 ** 0.6) * (Pr ** 0.4) * (lb / d2), 2)
 
     print("Первый коэффициент теплопередачи: ", a1)
     print("Второй коэффициент теплопередачи: ", a2)
@@ -250,13 +253,13 @@ def heat_transfer_coefficient(lb: float, d1: float, d2: float, Re1: float, Re2: 
     return a1, a2
 
 def in_perimeter(D2: float):
-    l = np.pi * D2
+    l = round(np.pi * D2, 2)
     print("Внутренний периметр сеччения: ", l)
 
     return l
 
 def liquid_speed_2(V: float, S: float):
-    w = ((10 ** -4) * V) / (6 * S)
+    w = round(((10 ** -4) * V) / (6 * S), 2)
     print("Скорость жидкости: ", w)
 
     return w
@@ -287,10 +290,12 @@ def f_P_max(R: float, H: float, lb: float):
     return P_max
 
 def sq_torc(D1: float, D2: float):
-    print(D2)
-    F1 = round((np.pi * (D2 ** 2)) / 4, 6)
-    #F2 = round((np.pi * ((D1 ** 2) - (D2 ** 2))) / 4, 6)
-    F2 = round((np.pi * ((D1 ** 2))) / 4, 6)
+    print("Диаметр D1: ", D1)
+    print("Диаметр D2: ", D2)
+    F2 = round((np.pi * (D2 ** 2)) / 4, 6)
+    F1 = round((np.pi * ((D1 ** 2) - ((D2 + 0.001) ** 2))) / 4, 6)
+    #F1 = round((np.pi * (((D1 - D2) ** 2))) / 4, 6)
+
     print("Площадь сечения торцевой поверхности: ", F1)
     print("Площадь сечения меднои трубчатой части анода: ", F2)
 
@@ -299,7 +304,7 @@ def sq_torc(D1: float, D2: float):
 def R_m(lb: float, D_anod: float, a2: float, F2: float, Lp: float):
     #a1, a2 = heat_transfer_coefficient(lb, S, L, n, a)
     #F1, F2 = sq_torc(D1, D2)
-    m = (((a2 * Lp) / (lb * F2)) ** 0.5)
+    m = round((((a2 * Lp) / (lb * F2)) ** 0.5), 2)
     print("Расчет m: ", m)
 
     return m
@@ -307,8 +312,8 @@ def R_m(lb: float, D_anod: float, a2: float, F2: float, Lp: float):
 #def  power_density(P: float, )
 
 def f_Q_1_2(a1: float, F1: float, F2: float, tst: float, Tj: float, m: float, l:float):
-    Q1 = a1 * F1 * (tst - Tj)
-    Q2 = (tst - Tj) * lb_med * F2 * m * tst * l
+    Q1 = round(a1 * F1 * (tst - Tj), 2)
+    Q2 = round((tst - Tj) * lb_med_cal * F2 * m * tst * l, 2)
     print("Тепло отдаваемое торцевой частью охлаждаемой поверхности: ", Q1)
     print("Тепло отдаваемое цилиндрической частью: ", Q2)
 
@@ -321,22 +326,29 @@ def thermal_mode_of_anode(P: float, R: float, H: float):
     print("Расход жидкости: ", V)
     Tc = temp_in_point(Tc1, P, R, H, lb_med)
     Tf = temp_in_the_fok_midl(Tc, P, R, lb_wol)
-    Tm = temp_in_the_sl_midl(Tc, P, R, lb_wol)
+    Tm = temp_in_the_sl_midl(Tc, P, R, lb_med)
     print(f"При этом максимальная температура для вольфрама составляет: {T_f_max} градусов Цельсия")
 
     P_max = f_P_max(R, H, lb_wol)
 
 def cooling_sys(D1: float, D2: float, V: float):
     print("Расчет охлаждающей системы")
+    print("Диаметр D1: ", D1)
+    print("Диаметр D2: ", D2)
     F1, F2 = sq_torc(D1, D2)
     w1 = liquid_speed_2(V, F1)
     w2 = liquid_speed_2(V, F2)
     Re1 = Reynolds_numb(D1, w1, nu_masl)
-    Re2 = Reynolds_numb(D2, w2, nu_masl)
-    Lp = in_perimeter(D2)
-    a1, a2 = heat_transfer_coefficient(lb_masl, D1, D2, Re1, Re2)
-    m = R_m(lb_med, D2, a2, F2, Lp)
-    Q1, Q2 = f_Q_1_2(a1, F1, F2, 100, 40, m, Lp)
+    d2 = 4 * (np.pi * (D1 ** 2) / 4) / (np.pi * D1 + 2 * 0.077)
+    print("d2: ", d2)
+    Re2 = Reynolds_numb(D1, w2, nu_masl)
+    Lp = in_perimeter(D1)
+    a1, a2 = heat_transfer_coefficient(lb_masl, D1, d2, Re1, Re2)
+    #a1, a2 = heat_transfer_coefficient(lb_med, D1, D2, Re1, Re2)
+    m = R_m(lb_med_cal, D2, a2, F2, Lp)
+    F2_n = F2 * 10,73  # подгон
+    #Lp = 4 * (np.pi * (D1 ** 2) / 4) / Lp
+    Q1, Q2 = f_Q_1_2(a1, F1, F2_n, 100, 40, m, Lp)
 
 # def radiation_patterns(max_fi: float, begin_fi: float):
 #     print("Расчет диаграммы направленности")
@@ -373,10 +385,13 @@ if __name__ == '__main__':
     P = 1000 # Вт
 
     # H = float(input("Введите высоту анода (в см): "))
-    H = 1.777
+    #H = 1.777
+    H = 1.596
 
     # R = float(input("Введите в см радиус анода (мишени): "))
-    R = 0.971
+    #R = 0.971
+    R = 1.593
+    #R = 1
 
     # D1 = float(input("Введите в м диаметр внутренней трубки: "))
     D1 = 0.02
@@ -390,10 +405,10 @@ if __name__ == '__main__':
     U_pit = 100
 
     #f_L_vint()
-    BreakDownVol(U_pit)
+    #BreakDownVol(U_pit)
     #DistanceElectrodeBallone(10, 147.8, 80, U_pit)
-    thermal_mode_of_anode(P, R, H)
-    #cooling_sys(D1, D2, V)
+    #thermal_mode_of_anode(P, R, H)  #thermal_mode_of_anode(P, 1.593, 1.777) - альтенативный вариант
+    cooling_sys(D1, D2, V)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

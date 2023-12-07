@@ -17,12 +17,13 @@ lb_med = 3.7 # Вт/(см * град) Это для меди
 lb_wol = 1.2 # Вт/(см * град) Это для вольфрама
 #lb_masl = 0.094 # ккал/(м * ч * град) Это для масла
 lb_masl = 0.192 # ккал/(м * ч * град) Это для масла
-lb_med_cal = 330 # ккал/(м * ч * град) Это для меди
+lb_med_cal: float = 330 # ккал/(м * ч * град) Это для меди
 Pr = 43.9  # для масла при 100 градусах
 nu_masl = 10.3 * (10 ** -6) # м^2/c кинематическая вязкость масла
 k0 = 2.2 * (10 ** -9) # Размерная константа в формуле Крамерса
 e_el = 1.6 * (10 ** -19) # заряд электрона
 Z_vol = 74 # Атомный номер вольфрама (мишени)
+mu_vol = 64.8 # см^-1 Для вольфрама
 
 tabl_vod = {1.16 * (10 ** -33): 1000,
             6.81 * (10 ** -30): 1100,
@@ -313,7 +314,8 @@ def R_m(lb: float, D_anod: float, a2: float, F2: float, Lp: float):
 
 def f_Q_1_2(a1: float, F1: float, F2: float, tst: float, Tj: float, m: float, l:float):
     Q1 = round(a1 * F1 * (tst - Tj), 2)
-    Q2 = round((tst - Tj) * lb_med_cal * F2 * m * tst * l, 2)
+    #Q2 = round((tst - Tj) * lb_med_cal * F2 * m * tst * l, 2)
+    Q2 = (tst - Tj) * lb_med_cal * F2 * m * tst * l
     print("Тепло отдаваемое торцевой частью охлаждаемой поверхности: ", Q1)
     print("Тепло отдаваемое цилиндрической частью: ", Q2)
 
@@ -350,16 +352,35 @@ def cooling_sys(D1: float, D2: float, V: float):
     #Lp = 4 * (np.pi * (D1 ** 2) / 4) / Lp
     Q1, Q2 = f_Q_1_2(a1, F1, F2_n, 100, 40, m, Lp)
 
-# def radiation_patterns(max_fi: float, begin_fi: float):
-#     print("Расчет диаграммы направленности")
-#     fi = [0] * 720
-#     I = [0] * 720
-#     delta = max_fi / 720
-#     for i in range(0, 720):
-#         fi[i] = i * delta + begin_fi
-#     I = P / Ua
-#     for i in range(0, 720):
-#         I[i] = ((k0 * (e_el ** 2) * (Ua ** 2) * I * Z_vol) / (2 * (r ** 2))) * math.e(-1 * ((mu * x0) / math.cos(fi)))
+def radiation_patterns(Ua: float, P: float, r: float, psi: float, x0: float):
+    print("Расчет диаграммы направленности")
+    #fi = [0] * 720
+    #I = [0] * 720
+    #delta = max_fi / 720
+
+    #for i in range(0, 720):
+    #    fi[i] = i * delta + begin_fi
+    #plt.axis(projection = 'polar')
+
+    fi = np.arange(0, (2 * np.pi), 0.01)
+
+    I_t = P / Ua
+    # for i in range(0, 720):
+    #     I[i] = ((k0 * (e_el ** 2) * (Ua ** 2) * I * Z_vol) / (2 * (r ** 2))) * math.e(-1 * ((mu_vol * x0) / math.cos(fi)))
+    koef = ((k0 * (e_el ** 2) * (Ua ** 2) * I_t * Z_vol) / (2 * (r ** 2)))
+    mu_x0 = mu_vol * x0 * math.cos(psi)
+
+    # for rad in fi:
+    #     I = koef * (2.19 ** (-1 * (mu_x0 / np.cos(rad))))
+    #     plt.polar(rad, I)
+    #     print("I: ", I)
+
+
+    for rad in fi:
+        r = (2 ** (-1 / np.cos(rad)))
+        print("r: ", r)
+        plt.polar(rad, r, 'g.')
+    plt.show()
 
 def I_SS_7167_func():
     # In = тут типа решение и все такое...
@@ -408,7 +429,8 @@ if __name__ == '__main__':
     #BreakDownVol(U_pit)
     #DistanceElectrodeBallone(10, 147.8, 80, U_pit)
     #thermal_mode_of_anode(P, R, H)  #thermal_mode_of_anode(P, 1.593, 1.777) - альтенативный вариант
-    cooling_sys(D1, D2, V)
+    #cooling_sys(D1, D2, V)
+    radiation_patterns(U_pit, P, 1,  20, 10)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
